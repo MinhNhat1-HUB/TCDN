@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Tài Chính Doanh Nghiệp</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6b46c1', 
+                        secondary: '#9f7aea', 
+                        accent: '#4fd1c5', 
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #68D391;
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #e2e8f0;
+            transition: all 0.3s;
+        }
+        .toggle-label {
+            width: 3rem;
+            height: 1.5rem;
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            transition: all 0.3s;
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .prose p { margin-bottom: 0.75em; }
+        .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .prose li { margin-bottom: 0.25em; }
+        .prose strong { color: #4338ca; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect, useRef } = React;
+
+        const chaptersData = [
+            { id: 0, title: "Tất cả 5 chương", color: "text-purple-500" },
+            { id: 1, title: "1. Tổng quan về Tài chính doanh nghiệp", color: "text-blue-500" },
+            { id: 2, title: "2. Giá trị theo thời gian của tiền tệ", color: "text-green-500" },
+            { id: 3, title: "3. Lợi nhuận và rủi ro", color: "text-yellow-500" },
+            { id: 4, title: "4. Chi phí sử dụng vốn", color: "text-orange-500" },
+            { id: 5, title: "5. Lý thuyết cơ cấu vốn", color: "text-red-500" }
+        ];
+
+        // DỮ LIỆU ĐÃ ĐƯỢC MỞ RỘNG (GẦN 50 CÂU TỪ ĐỀ CƯƠNG)
+        const questionsData = [
+            {
+                id: 1, chapterId: 1, tag: "Câu hỏi", source: "Tài liệu học",
+                text: "Thông thường công ty cổ phần được sở hữu bởi:",
+                options: [
+                    { id: 'A', text: "Các nhà quản lý của chính công ty" },
+                    { id: 'B', text: "Các cổ đông" },
+                    { id: 'C', text: "Hội đồng quản trị" },
+                    { id: 'D', text: "Tất cả các câu trên đều đúng" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Công ty cổ phần huy động vốn bằng cách phát hành cổ phiếu. Người sở hữu cổ phiếu được gọi là cổ đông, và họ chính là những người chủ sở hữu thực sự của công ty."
+            },
+            {
+                id: 2, chapterId: 1, tag: "Câu hỏi", source: "Tài liệu học",
+                text: "Trong các quyết định sau đây, nội dung nào thuộc vấn đề cơ bản của tài chính doanh nghiệp?",
+                options: [
+                    { id: 'A', text: "Quyết định tuyển dụng lao động" },
+                    { id: 'B', text: "Quyết định cơ cấu và tỷ trọng các nguồn tài trợ" },
+                    { id: 'C', text: "Quyết định xây dựng thương hiệu" },
+                    { id: 'D', text: "Cả 3 nội dung trên" }
+                ],
+                correctAnswer: 'B',
+                explanation: "3 quyết định tài chính cơ bản gồm: Quyết định đầu tư, Quyết định tài trợ (cơ cấu vốn), và Quyết định quản lý tài sản (vốn luân chuyển)."
+            },
+            {
+                id: 3, chapterId: 1, tag: "Lý thuyết", source: "Tài liệu học",
+                text: "Lợi nhuận gộp được xác định bằng:",
+                options: [
+                    { id: 'A', text: "EAT − Cổ tức" },
+                    { id: 'B', text: "EBIT − Thuế" },
+                    { id: 'C', text: "Doanh thu thuần − Chi phí lãi vay" },
+                    { id: 'D', text: "Doanh thu thuần − Giá vốn hàng bán" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Theo báo cáo kết quả kinh doanh, Lợi nhuận gộp (Gross Profit) = Doanh thu thuần - Giá vốn hàng bán."
+            },
+            {
+                id: 4, chapterId: 2, tag: "Vận dụng", source: "Tài liệu học",
+                text: "Một trái phiếu có lãi suất coupon nhỏ hơn lãi suất thị trường thì càng gần đến ngày đáo hạn giá trái phiếu sẽ:",
+                options: [
+                    { id: 'A', text: "Tăng dần và tiến về mệnh giá" },
+                    { id: 'B', text: "Giảm dần và tiến về mệnh giá" },
+                    { id: 'C', text: "Giảm dần và tiến về 0" },
+                    { id: 'D', text: "Không có đủ thông tin kết luận" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Khi lãi suất coupon < lãi suất thị trường, trái phiếu đang được bán với giá chiết khấu (thấp hơn mệnh giá). Càng gần ngày đáo hạn, giá trị của nó sẽ tăng dần lên để đúng bằng mệnh giá vào ngày đáo hạn."
+            },
+            {
+                id: 5, chapterId: 3, tag: "Câu hỏi", source: "Tài liệu học",
+                text: "Khi hệ số tương quan giữa 2 tài sản Cov(RA,RB) = 0, điều này có nghĩa là:",
+                options: [
+                    { id: 'A', text: "Tỷ suất sinh lợi của A và B biến động ngược chiều" },
+                    { id: 'B', text: "Tỷ suất sinh lợi của A và B biến động cùng chiều" },
+                    { id: 'C', text: "Tỷ suất sinh lợi của A và B không có sự tương quan tuyến tính" },
+                    { id: 'D', text: "Rủi ro của danh mục bằng 0" }
+                ],
+                correctAnswer: 'C',
+                explanation: "Covariance (Hiệp phương sai) = 0 cho thấy không có mối tương quan tuyến tính nào giữa sự biến động tỷ suất sinh lợi của hai tài sản."
+            },
+            {
+                id: 6, chapterId: 4, tag: "Vận dụng", source: "Tài liệu học",
+                text: "Khi tỷ trọng nợ (có chi phí sau thuế thấp) trong cơ cấu vốn tăng lên, trong điều kiện các yếu tố khác không đổi, WACC có xu hướng:",
+                options: [
+                    { id: 'A', text: "Giảm xuống do tận dụng được tấm chắn thuế từ lãi vay" },
+                    { id: 'B', text: "Tăng lên do chi phí nợ cao" },
+                    { id: 'C', text: "Luôn bằng chi phí vốn chủ sở hữu" },
+                    { id: 'D', text: "Không thay đổi" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Lãi vay được trừ vào chi phí hợp lý khi tính thuế (tạo ra tấm chắn thuế). Do đó, tăng tỷ trọng nợ (chi phí rẻ hơn vốn cổ phần) thường làm giảm chi phí vốn bình quân (WACC) ban đầu."
+            },
+            {
+                id: 7, chapterId: 4, tag: "Lý thuyết", source: "Tài liệu học",
+                text: "Với các yếu tố khác không đổi, nếu tăng thuế suất thuế TNDN thì chi phí vốn bình quân (WACC) sẽ:",
+                options: [
+                    { id: 'A', text: "Tăng" },
+                    { id: 'B', text: "Giảm" },
+                    { id: 'C', text: "Không đổi" },
+                    { id: 'D', text: "Bằng chi phí nợ vay" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Công thức chi phí nợ vay sau thuế = rd * (1 - T). Thuế suất (T) tăng làm chi phí nợ sau thuế giảm mạnh hơn, kéo theo WACC giảm xuống."
+            },
+            {
+                id: 8, chapterId: 5, tag: "Câu hỏi", source: "Tài liệu học",
+                text: "Lý thuyết nào giả định xây dựng lý thuyết cơ cấu vốn trong điều kiện thị trường hoàn hảo?",
+                options: [
+                    { id: 'A', text: "Quan điểm truyền thống" },
+                    { id: 'B', text: "Lý thuyết M&M" },
+                    { id: 'C', text: "Lý thuyết đánh đổi" },
+                    { id: 'D', text: "Lý thuyết trật tự phân hạng" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Lý thuyết Modigliani-Miller (M&M) ban đầu được xây dựng dựa trên các giả định rất chặt chẽ về một thị trường vốn hoàn hảo (không thuế, không chi phí giao dịch, v.v.)."
+            },
+            {
+                id: 9, chapterId: 5, tag: "Câu hỏi", source: "Tài liệu học",
+                text: "Ý nghĩa nào đúng khi nói đến Độ bẩy tài chính (DFL) của doanh nghiệp?",
+                options: [
+                    { id: 'A', text: "Mức phóng đại % thay đổi của EBIT so với % thay đổi của doanh thu" },
+                    { id: 'B', text: "Mức phóng đại % thay đổi của EPS so với % thay đổi của doanh thu" },
+                    { id: 'C', text: "Mức phóng đại % thay đổi của EPS so với % thay đổi của EBIT" },
+                    { id: 'D', text: "Mức thay đổi của Lợi nhuận gộp" }
+                ],
+                correctAnswer: 'C',
+                explanation: "DFL (Degree of Financial Leverage) đo lường độ nhạy cảm của Thu nhập trên mỗi cổ phần (EPS) đối với sự thay đổi của Lợi nhuận trước thuế và lãi vay (EBIT)."
+            },
+            {
+                id: 10, chapterId: 5, tag: "Câu hỏi", source: "Tài liệu học",
+                text: "Đặc điểm nào sau đây, là đúng với doanh nghiệp áp dụng chiến lược tài trợ thận trọng?",
+                options: [
+                    { id: 'A', text: "Chi phí vốn cao" },
+                    { id: 'B', text: "Sẵn sàng đối mặt với rủi ro" },
+                    { id: 'C', text: "Dễ mất khả năng thanh toán" },
+                    { id: 'D', text: "Sử dụng nhiều nợ ngắn hạn" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Chiến lược thận trọng sử dụng nhiều vốn dài hạn (vốn chủ hoặc nợ dài hạn) để tài trợ cho cả tài sản ngắn hạn. Vốn dài hạn thường có chi phí cao hơn vốn ngắn hạn, dẫn đến tổng chi phí vốn cao."
+            },
+            // PHẦN CÂU HỎI MỚI CẬP NHẬT TỪ ĐỀ CƯƠNG
+            {
+                id: 11, chapterId: 1, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Mục tiêu cuối cùng mà hoạt động quản trị tài chính doanh nghiệp hướng tới là:",
+                options: [
+                    { id: 'A', text: "Tối đa hóa doanh thu" },
+                    { id: 'B', text: "Tối thiểu hóa chi phí" },
+                    { id: 'C', text: "Tối đa hóa thị phần" },
+                    { id: 'D', text: "Tối đa hóa giá trị doanh nghiệp (tối đa hóa tài sản của cổ đông)" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Mục tiêu tối đa hóa giá trị doanh nghiệp phản ánh việc xem xét yếu tố thời gian và rủi ro của dòng tiền, mang lại lợi ích thực sự và lâu dài cho cổ đông."
+            },
+            {
+                id: 12, chapterId: 1, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Vấn đề người đại diện (Agency problem) là mâu thuẫn về lợi ích giữa:",
+                options: [
+                    { id: 'A', text: "Chủ nợ và khách hàng" },
+                    { id: 'B', text: "Chủ sở hữu và người điều hành" },
+                    { id: 'C', text: "Doanh nghiệp và khách hàng" },
+                    { id: 'D', text: "Nhà nước và doanh nghiệp" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Vấn đề người đại diện xuất phát từ sự tách biệt giữa quyền sở hữu (của các cổ đông) và quyền điều hành (của ban giám đốc), dẫn đến mâu thuẫn lợi ích."
+            },
+            {
+                id: 13, chapterId: 1, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Quyết định nào dưới đây thuộc quyết định tài trợ?",
+                options: [
+                    { id: 'A', text: "Mở rộng quy mô hoạt động" },
+                    { id: 'B', text: "Phát triển sản phẩm mới" },
+                    { id: 'C', text: "Sử dụng tín dụng thương mại thay vì vay nợ ngắn hạn" },
+                    { id: 'D', text: "Chi tiền trả lãi trái phiếu" }
+                ],
+                correctAnswer: 'C',
+                explanation: "Quyết định tài trợ liên quan đến việc chọn lựa và thiết lập cơ cấu nguồn vốn (nợ/vốn chủ) để tài trợ cho các hoạt động của doanh nghiệp."
+            },
+            {
+                id: 14, chapterId: 1, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Giá trị nguồn vốn chủ sở hữu ở một công ty cổ phần có thể tính theo công thức nào dưới đây?",
+                options: [
+                    { id: 'A', text: "Vốn cổ phần + lợi nhuận giữ lại – thặng dư vốn" },
+                    { id: 'B', text: "Vốn cổ phần theo mệnh giá + lợi nhuận giữ lại + thặng dư vốn" },
+                    { id: 'C', text: "Vốn cổ phần - lợi nhuận giữ lại – thặng dư vốn" },
+                    { id: 'D', text: "Vốn cổ phần - lợi nhuận giữ lại + thặng dư vốn" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Theo chuẩn mực kế toán, Vốn chủ sở hữu = Vốn điều lệ (tính theo mệnh giá) + Thặng dư vốn cổ phần + Lợi nhuận chưa phân phối (lợi nhuận giữ lại)."
+            },
+            {
+                id: 15, chapterId: 1, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Cổ phiếu công ty đã phát hành; sau đó có thể tiếp tục được mua bán giữa các nhà đầu tư trên thị trường nào?",
+                options: [
+                    { id: 'A', text: "Thị trường tiền tệ" },
+                    { id: 'B', text: "Thị trường sức lao động" },
+                    { id: 'C', text: "Thị trường sơ cấp" },
+                    { id: 'D', text: "Thị trường thứ cấp" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Thị trường thứ cấp là nơi giao dịch các chứng khoán đã được phát hành trước đó trên thị trường sơ cấp."
+            },
+            {
+                id: 16, chapterId: 4, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Chi phí nào sau đây tạo ra lá chắn thuế?",
+                options: [
+                    { id: 'A', text: "Chi phí nguyên vật liệu" },
+                    { id: 'B', text: "Chi phí khấu hao, chi phí lãi vay" },
+                    { id: 'C', text: "Chi phí nhân công" },
+                    { id: 'D', text: "Tất cả đều đúng" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Theo nguyên lý thì tất cả các khoản chi phí hợp lý được trừ trước thuế đều tạo ra lá chắn thuế. Tuy nhiên, trong Tài chính doanh nghiệp người ta thường nhấn mạnh đến Tấm chắn thuế từ Khấu hao và Lãi vay vì đây là những quyết định tài chính quan trọng."
+            },
+            {
+                id: 17, chapterId: 1, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Mức cổ tức trả cho cổ đông phổ thông được căn cứ trên:",
+                options: [
+                    { id: 'A', text: "Mệnh giá của cổ phiếu và lãi suất coupon" },
+                    { id: 'B', text: "Kết quả kinh doanh và chính sách cổ tức của công ty" },
+                    { id: 'C', text: "Mức lãi trả cho các trái phiếu cùng kỳ" },
+                    { id: 'D', text: "Giá trị thị trường của cổ phiếu" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Cổ đông phổ thông là người hưởng lợi nhuận còn lại. Do đó, cổ tức phụ thuộc trực tiếp vào kết quả kinh doanh đạt được và chính sách giữ lại lợi nhuận của ban lãnh đạo."
+            },
+            {
+                id: 18, chapterId: 2, tag: "Bài tập", source: "Đề Cương",
+                text: "Một khoản đầu tư với lãi suất 10%/năm trong tình hình nền kinh tế có lạm phát 6%/năm thì lãi suất thực của khoản đầu tư này là:",
+                options: [
+                    { id: 'A', text: "Dương 3,77% /năm" },
+                    { id: 'B', text: "Dương 17,02% /năm" },
+                    { id: 'C', text: "Dương 4,26% /năm" },
+                    { id: 'D', text: "Âm 3,64% /năm" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Theo phương trình Fisher: (1 + r_danhnghia) = (1 + r_thuc) * (1 + lạm phát). Vậy r_thuc = (1 + 0.1) / (1 + 0.06) - 1 = 3.77%."
+            },
+            {
+                id: 19, chapterId: 2, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Lãi kép có cách tính như thế nào?",
+                options: [
+                    { id: 'A', text: "Tiền lãi kỳ sau được nhập vào vốn gốc khi tính lãi cho kỳ trước" },
+                    { id: 'B', text: "Tiền lãi kỳ trước được nhập vào vốn gốc khi tính lãi cho kỳ sau" },
+                    { id: 'C', text: "Tiền lãi kỳ trước không được nhập vào vốn gốc khi tính lãi cho kỳ sau" },
+                    { id: 'D', text: "Tiền lãi kỳ sau không được nhập vào vốn gốc khi tính lãi cho kỳ trước" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Lãi kép (Compound Interest) là phương pháp tính lãi trong đó tiền lãi của kỳ trước được gộp chung vào vốn gốc để làm căn cứ tính lãi cho kỳ tiếp theo."
+            },
+            {
+                id: 20, chapterId: 2, tag: "Bài tập", source: "Đề Cương",
+                text: "Nếu bạn đầu tư 100 triệu đồng với suất sinh lợi 8%/năm (lãi nhập vốn hàng năm); thì sau bao nhiêu năm vốn của bạn trở thành gấp đôi số ban đầu?",
+                options: [
+                    { id: 'A', text: "8 năm" },
+                    { id: 'B', text: "9 năm" },
+                    { id: 'C', text: "12 năm" },
+                    { id: 'D', text: "13 năm" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Áp dụng công thức FV = PV * (1+r)^n. Đề bài cho FV = 2*PV. Vậy 2 = (1.08)^n => n = ln(2)/ln(1.08) ≈ 9.006 năm."
+            },
+            {
+                id: 21, chapterId: 2, tag: "Bài tập", source: "Đề Cương",
+                text: "Gửi 200 triệu đồng, lãi suất 10%/năm, lãi nhập gốc hàng tháng. Sau 5 năm có được:",
+                options: [
+                    { id: 'A', text: "300 triệu đồng" },
+                    { id: 'B', text: "329,1 triệu đồng" },
+                    { id: 'C', text: "322,1 triệu đồng" },
+                    { id: 'D', text: "302,9 triệu đồng" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Công thức ghép lãi nhiều lần: FV = PV * (1 + r/m)^(n*m) = 200 * (1 + 0.1/12)^(5*12) = 200 * (1.00833)^60 ≈ 329.1 triệu đồng."
+            },
+            {
+                id: 22, chapterId: 2, tag: "Tư duy", source: "Đề Cương",
+                text: "Trái phiếu X trả lãi vào đầu mỗi kỳ, trái phiếu Y trả lãi vào cuối mỗi kỳ. Hai trái phiếu này có cùng mệnh giá, cùng kỳ hạn, cùng lãi suất coupon và cùng tỷ suất sinh lời yêu cầu. Hỏi giá trị định giá trái phiếu nào cao hơn?",
+                options: [
+                    { id: 'A', text: "Trái phiếu Y" },
+                    { id: 'B', text: "Không đủ thông tin để kết luận" },
+                    { id: 'C', text: "Giá 2 trái phiếu bằng nhau" },
+                    { id: 'D', text: "Trái phiếu X" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Trái phiếu X trả lãi vào đầu kỳ, do đó người nắm giữ nhận được dòng tiền sớm hơn 1 kỳ so với trái phiếu Y. Hiện giá của một khoản tiền nhận được sớm hơn luôn lớn hơn, nên giá trị định giá của trái phiếu X sẽ cao hơn."
+            },
+            {
+                id: 23, chapterId: 2, tag: "Bài tập", source: "Đề Cương",
+                text: "Lãi suất tiền gửi tiết kiệm được ngân hàng công bố là 12%/năm, tỷ lệ lạm phát trong cùng kỳ là 8% thì lãi suất danh nghĩa là bao nhiêu?",
+                options: [
+                    { id: 'A', text: "12%/năm" },
+                    { id: 'B', text: "1,5%/năm" },
+                    { id: 'C', text: "16%/năm" },
+                    { id: 'D', text: "4%/năm" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Lãi suất ngân hàng niêm yết trên giấy tờ hoặc bảng thông báo luôn được gọi là lãi suất danh nghĩa (Nominal Interest Rate)."
+            },
+            {
+                id: 24, chapterId: 2, tag: "Tư duy", source: "Đề Cương",
+                text: "Thay vì trả tiền thuê nhà vào đầu tháng, bạn đàm phán với chủ nhà điều chỉnh thành trả vào cuối tháng. Số tiền trả mỗi tháng sẽ thay đổi như thế nào để hai phương án vẫn tương đương nhau (lãi suất > 0 không đổi)?",
+                options: [
+                    { id: 'A', text: "Không thay đổi" },
+                    { id: 'B', text: "Tăng" },
+                    { id: 'C', text: "Giảm" },
+                    { id: 'D', text: "Không đủ thông tin để kết luận" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Vì việc trả vào cuối tháng khiến chủ nhà nhận tiền muộn hơn, nên số tiền danh nghĩa mỗi kỳ phải TĂNG LÊN (nhân thêm (1+r)) để hiện giá của toàn bộ dòng tiền giữ mức tương đương như ban đầu."
+            },
+            {
+                id: 25, chapterId: 2, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Khi một trái phiếu đang giao dịch với giá thấp hơn mệnh giá (at discount), nghĩa là:",
+                options: [
+                    { id: 'A', text: "Lãi suất coupon thấp hơn YTM" },
+                    { id: 'B', text: "Lãi suất coupon bằng với YTM" },
+                    { id: 'C', text: "Lãi suất coupon cao hơn YTM" },
+                    { id: 'D', text: "Tất cả các ý trên đều sai" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Khi lãi suất chiết khấu (YTM - thị trường) cao hơn lãi suất coupon, trái phiếu mang lại dòng lãi kém hấp dẫn hơn mức trung bình của thị trường nên sẽ bị bán chiết khấu (giá < mệnh giá)."
+            },
+            {
+                id: 26, chapterId: 3, tag: "Tư duy", source: "Đề Cương",
+                text: "Tài sản A và B có tỷ suất sinh lời kỳ vọng lần lượt là 30% và 15%. Độ lệch chuẩn tỷ suất sinh lời của A và B lần lượt là 12% và 9%. Phát biểu nào sau đây là đúng?",
+                options: [
+                    { id: 'A', text: "A có hệ số biến thiên cao hơn B" },
+                    { id: 'B', text: "B có hệ số biến thiên cao hơn A" },
+                    { id: 'C', text: "A có tỷ suất sinh lời kỳ vọng thấp hơn B" },
+                    { id: 'D', text: "Không đủ cơ sở đưa ra nhận định" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Hệ số biến thiên (CV) = Độ lệch chuẩn / Tỷ suất sinh lời kỳ vọng. CV_A = 12% / 30% = 0.4. CV_B = 9% / 15% = 0.6. Suy ra rủi ro tương đối của B cao hơn A."
+            },
+            {
+                id: 27, chapterId: 3, tag: "Bài tập", source: "Đề Cương",
+                text: "Hệ số β của công ty A là 1,8, lãi suất phi rủi ro là 6%, tỷ suất sinh lời đòi hỏi của danh mục thị trường: 12%. Theo mô hình CAPM, chi phí của nguồn tài trợ này là:",
+                options: [
+                    { id: 'A', text: "27,6 %" },
+                    { id: 'B', text: "16,4 %" },
+                    { id: 'C', text: "16,1 %" },
+                    { id: 'D', text: "16,8 %" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Mô hình CAPM: E(R) = Rf + Beta * (Rm - Rf) = 6% + 1.8 * (12% - 6%) = 6% + 10.8% = 16.8%."
+            },
+            {
+                id: 28, chapterId: 3, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Loại rủi ro nào có thể triệt tiêu được bằng giải pháp đa dạng hóa danh mục đầu tư?",
+                options: [
+                    { id: 'A', text: "Rủi ro phi hệ thống (unsystematic risk)" },
+                    { id: 'B', text: "Rủi ro hệ thống (systematic risk)" },
+                    { id: 'C', text: "Cả rủi ro hệ thống và phi hệ thống" },
+                    { id: 'D', text: "Không có loại nào" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Rủi ro phi hệ thống (còn gọi là rủi ro đặc thù công ty) có thể được triệt tiêu bằng cách đa dạng hóa. Rủi ro hệ thống (do yếu tố vĩ mô chung) thì không thể triệt tiêu."
+            },
+            {
+                id: 29, chapterId: 3, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Những chỉ tiêu nào được sử dụng để đo lường rủi ro của một khoản đầu tư đơn lẻ?",
+                options: [
+                    { id: 'A', text: "ROI và ROA và ROE" },
+                    { id: 'B', text: "Độ lệch chuẩn của tỷ suất sinh lời." },
+                    { id: 'C', text: "ROS và NPV và EBIT" },
+                    { id: 'D', text: "NPV và IRR và MIRR" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Độ lệch chuẩn (Standard Deviation) và Phương sai (Variance) là hai chỉ tiêu thống kê cơ bản đo lường mức độ phân tán của Tỷ suất sinh lời quanh giá trị kỳ vọng, đại diện cho rủi ro."
+            },
+            {
+                id: 30, chapterId: 4, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Khi xác định WACC của doanh nghiệp vào một thời điểm cụ thể, tỷ trọng của các nguồn vốn ưu tiên được xác định theo:",
+                options: [
+                    { id: 'A', text: "Cơ cấu vốn mục tiêu" },
+                    { id: 'B', text: "Tất cả đều sai" },
+                    { id: 'C', text: "Giá thị trường" },
+                    { id: 'D', text: "Giá sổ sách" }
+                ],
+                correctAnswer: 'C',
+                explanation: "Tỷ trọng vốn nên được tính bằng giá trị thị trường của từng nguồn tài trợ thay vì giá trị sổ sách, vì giá thị trường phản ánh đúng quy mô và chi phí thực tế vào thời điểm hiện tại."
+            },
+            {
+                id: 31, chapterId: 4, tag: "Bài tập", source: "Đề Cương",
+                text: "Công ty AA có tổng vốn hoạt động là 200 tỷ đồng; vốn CP thường 110 tỷ (chi phí 15%), CP ưu tiên 10 tỷ (chi phí 12%), nợ vay 80 tỷ (chi phí nợ trước thuế 10%). Tính WACC biết thuế suất 20%.",
+                options: [
+                    { id: 'A', text: "12,05%/năm" },
+                    { id: 'B', text: "13,65%/năm" },
+                    { id: 'C', text: "12,47%/năm" },
+                    { id: 'D', text: "11,70%/năm" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Tỷ trọng: E = 55%, P = 5%, D = 40%. \nWACC = 0.55 * 15% + 0.05 * 12% + 0.40 * 10% * (1 - 0.2) = 8.25% + 0.6% + 3.2% = 12.05%."
+            },
+            {
+                id: 32, chapterId: 4, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Khi tỷ lệ chi trả cổ tức của công ty tăng lên, thì tỷ lệ lợi nhuận giữ lại của công ty sẽ:",
+                options: [
+                    { id: 'A', text: "Giảm" },
+                    { id: 'B', text: "Tăng" },
+                    { id: 'C', text: "Không có căn cứ để nhận định" },
+                    { id: 'D', text: "Không thay đổi" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Tỷ lệ lợi nhuận giữ lại (Retention Ratio) = 1 - Tỷ lệ chi trả cổ tức (Payout Ratio). Do tổng lợi nhuận bằng 100%, tỷ lệ trả cổ tức tăng thì phần còn lại giữ lại sẽ bắt buộc phải giảm."
+            },
+            {
+                id: 33, chapterId: 4, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Một dự án có NPV nhỏ hơn 0 thì IRR của dự án đó:",
+                options: [
+                    { id: 'A', text: "IRR lớn hơn 0" },
+                    { id: 'B', text: "IRR nhỏ hơn 0" },
+                    { id: 'C', text: "IRR nhỏ hơn lãi suất chiết khấu" },
+                    { id: 'D', text: "IRR lớn hơn lãi suất chiết khấu" }
+                ],
+                correctAnswer: 'C',
+                explanation: "Theo mối quan hệ đồ thị giá trị hiện tại ròng: Khi IRR bằng suất chiết khấu thì NPV = 0. Nếu dự án có NPV < 0 (không khả thi), tức là suất chiết khấu hiện tại đang lớn hơn IRR."
+            },
+            {
+                id: 34, chapterId: 4, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Trong điều kiện những yếu tố khác giống nhau, thuế TNDN phải nộp sẽ thay đổi như thế nào nếu chuyển từ khấu hao đường thẳng sang số dư giảm dần có điều chỉnh?",
+                options: [
+                    { id: 'A', text: "Giảm vào những năm đầu và tăng tương ứng vào những năm sau" },
+                    { id: 'B', text: "Giảm tổng thuế TNDN phải nộp của tất cả các năm" },
+                    { id: 'C', text: "Tăng vào những năm đầu và giảm tương ứng vào những năm sau" },
+                    { id: 'D', text: "Tăng tổng thuế TNDN phải nộp của tất cả các năm" }
+                ],
+                correctAnswer: 'A',
+                explanation: "Phương pháp khấu hao nhanh tạo ra chi phí khấu hao lớn hơn trong những năm đầu, từ đó khiến lợi nhuận chịu thuế giảm và thuế TNDN phải nộp cũng giảm ở các năm đầu, chuyển dịch gánh nặng thuế về các năm sau."
+            },
+            {
+                id: 35, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Đòn bẩy tài chính (DFL) tác động trực tiếp đến chỉ tiêu lợi nhuận nào?",
+                options: [
+                    { id: 'A', text: "EBIT và EBT" },
+                    { id: 'B', text: "EBT và EAT" },
+                    { id: 'C', text: "EBIT" },
+                    { id: 'D', text: "EBIT, EBT và EAT" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Đòn bẩy tài chính thể hiện việc sử dụng chi phí lãi vay (lãi cố định). Lãi vay nằm dưới EBIT và trước EBT. Do đó, nó làm ảnh hưởng tới EBT và lợi nhuận ròng EAT (và cuối cùng là EPS)."
+            },
+            {
+                id: 36, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Trong môi trường không có thuế TNDN; khi sử dụng nợ, theo lý thuyết M&M, giá trị của công ty sẽ:",
+                options: [
+                    { id: 'A', text: "Càng tăng khi tăng nợ" },
+                    { id: 'B', text: "Càng tăng khi giảm nợ" },
+                    { id: 'C', text: "Bằng 1 khi Nợ bằng vốn chủ sở hữu" },
+                    { id: 'D', text: "Không chịu ảnh hưởng của sự thay đổi cơ cấu vốn" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Theo định lý MM mệnh đề I (Không thuế), V_L = V_U. Việc thay đổi tỷ trọng nợ không tạo ra giá trị gia tăng nào vì dòng tiền tạo ra từ tài sản công ty không đổi."
+            },
+            {
+                id: 37, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Theo lý thuyết M&M có thuế về cơ cấu vốn, khoản giá trị gia tăng nhờ tiết kiệm thuế từ lãi vay có dạng:",
+                options: [
+                    { id: 'A', text: "Dòng tiền đều" },
+                    { id: 'B', text: "Tất cả đều sai" },
+                    { id: 'C', text: "Dòng tiền không đều" },
+                    { id: 'D', text: "Dòng tiền đều mãi mãi" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Giả định của M&M coi khoản nợ là vĩnh viễn, nên tiền lãi trả định kỳ không đổi là vĩnh viễn. Suy ra tấm chắn thuế từ lãi vay (D*rd*T) cũng là một niên kim vĩnh viễn."
+            },
+            {
+                id: 38, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Nếu doanh nghiệp không sử dụng nợ thì đâu là mối quan hệ luôn luôn đúng?",
+                options: [
+                    { id: 'A', text: "EBIT = EBITDA" },
+                    { id: 'B', text: "EBIT = EBT" },
+                    { id: 'C', text: "EAT = EBT" },
+                    { id: 'D', text: "EAT = EBIT" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Nếu không có nợ vay, chi phí lãi vay (I) = 0. EBT = EBIT - I = EBIT - 0 = EBIT."
+            },
+            {
+                id: 39, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Để đánh giá khả năng trả lãi tiền vay của doanh nghiệp, người ta sử dụng chỉ tiêu nào sau đây?",
+                options: [
+                    { id: 'A', text: "EBITDA" },
+                    { id: 'B', text: "EBIT" },
+                    { id: 'C', text: "EBT" },
+                    { id: 'D', text: "EBIT x (1 - thuế suất thuế TNDN)" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Hệ số khả năng thanh toán lãi vay = EBIT / Lãi vay (Interest). Do đó EBIT (Lợi nhuận trước thuế và lãi vay) là chỉ tiêu đánh giá sức trả lãi."
+            },
+            {
+                id: 40, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Sự thay đổi cơ cấu vốn của doanh nghiệp (thay thế VCSH bằng Nợ) sẽ trực tiếp ảnh hưởng đến chỉ tiêu nào sau đây?",
+                options: [
+                    { id: 'A', text: "ROI" },
+                    { id: 'B', text: "ROE" },
+                    { id: 'C', text: "EBITDA" },
+                    { id: 'D', text: "Tất cả các chỉ tiêu trên" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Cơ cấu vốn thay đổi làm thay đổi chi phí lãi vay và vốn chủ sở hữu, từ đó tác động mạnh đến Tỷ suất sinh lời trên vốn chủ (ROE). ROI và EBITDA thuộc về hiệu quả hoạt động không đổi."
+            },
+            {
+                id: 41, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Điểm hòa vốn của một phương án kinh doanh là giao điểm của:",
+                options: [
+                    { id: 'A', text: "Đường định phí (FC) và đường doanh thu (S)" },
+                    { id: 'B', text: "Đường biến phí (VC) và đường doanh thu (S)" },
+                    { id: 'C', text: "Đường tổng chi phí (TC) và đường doanh thu (S)" },
+                    { id: 'D', text: "Đường biến phí (VC) và đường định phí (FC)" }
+                ],
+                correctAnswer: 'C',
+                explanation: "Tại điểm hòa vốn kinh tế, Tổng Doanh Thu (S) bằng với Tổng Chi Phí (TC). Trên đồ thị, đó là điểm cắt nhau của hai đường này."
+            },
+            {
+                id: 42, chapterId: 5, tag: "Lý thuyết", source: "Đề Cương",
+                text: "Khi sản lượng tiêu thụ ngày càng xa (lớn hơn rất nhiều) điểm hòa vốn thì:",
+                options: [
+                    { id: 'A', text: "Tác động của đòn bẩy hoạt động càng tăng và tiến dần đến vô cùng" },
+                    { id: 'B', text: "Tác động của đòn bẩy hoạt động càng tăng và tiến dần đến 1" },
+                    { id: 'C', text: "Tác động của đòn bẩy hoạt động càng giảm và tiến dần đến 0" },
+                    { id: 'D', text: "Tác động của đòn bẩy hoạt động càng giảm và tiến dần đến 1" }
+                ],
+                correctAnswer: 'D',
+                explanation: "Công thức DOL = Q(P-V) / [Q(P-V) - F]. Khi Q rất lớn, F trở nên không đáng kể so với Q(P-V), do đó phân số tiến dần về 1."
+            },
+            {
+                id: 43, chapterId: 5, tag: "Bài tập", source: "Đề Cương",
+                text: "Dự án sản xuất 3.000 SP, giá bán thuần 200.000đ/SP. Biến phí tổng cộng (vật tư 360tr + tiền lương 60tr) là 420tr. Định phí 120 triệu đồng. Tính sản lượng hòa vốn (Q_be).",
+                options: [
+                    { id: 'A', text: "1.500 SP" },
+                    { id: 'B', text: "2.000 SP" },
+                    { id: 'C', text: "1.200 SP" },
+                    { id: 'D', text: "3.000 SP" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Biến phí đơn vị (v) = 420.000.000 / 3000 = 140.000 đ/SP. Sản lượng hòa vốn Q_be = Định phí / (Giá bán - v) = 120.000.000 / (200.000 - 140.000) = 2.000 sản phẩm."
+            },
+            {
+                id: 44, chapterId: 5, tag: "Bài tập", source: "Đề Cương",
+                text: "Công ty có EBIT là 1 tỷ đồng/năm. Giá thị trường các khoản nợ 2 tỷ đồng, chi phí nợ trước thuế 12,5%/năm. WACC 16%/năm. Theo M&M (thuế 20%), xác định tỷ số nợ trên vốn chủ (D/E).",
+                options: [
+                    { id: 'A', text: "1/3" },
+                    { id: 'B', text: "2/3" },
+                    { id: 'C', text: "2/5" },
+                    { id: 'D', text: "1/2" }
+                ],
+                correctAnswer: 'B',
+                explanation: "Sử dụng công thức tính giá trị của công ty V = EBIT*(1-T)/WACC = 1*(1-0.2)/0.16 = 5 tỷ đồng. Vì Nợ D = 2 tỷ => Vốn chủ E = V - D = 5 - 2 = 3 tỷ. Tỷ số D/E = 2/3."
+            }
+        ];
+
+        const theoryData = {
+            1: `<h3>Tổng quan về Tài chính Doanh nghiệp</h3>
+                <p><strong>Khái niệm:</strong> Tài chính doanh nghiệp là những quan hệ kinh tế dưới hình thức giá trị, phát sinh trong quá trình hình thành và sử dụng các quỹ tiền tệ của doanh nghiệp.</p>
+                <p><strong>Mục tiêu:</strong> Tối đa hóa giá trị doanh nghiệp (tối đa hóa tài sản của cổ đông), thay vì chỉ tối đa hóa lợi nhuận hiện tại.</p>
+                <p><strong>Các quyết định chủ yếu:</strong></p>
+                <ul>
+                    <li><strong>Quyết định đầu tư:</strong> Mua sắm tài sản cố định, ngân sách vốn (Capital Budgeting). Trả lời câu hỏi: Đầu tư vào tài sản nào.</li>
+                    <li><strong>Quyết định tài trợ:</strong> Cấu trúc vốn (Capital Structure), kết hợp nợ và vốn cổ phần. Quyết định nguồn huy động vốn.</li>
+                    <li><strong>Quyết định quản lý vốn luân chuyển:</strong> Quản lý tài sản ngắn hạn và nợ ngắn hạn.</li>
+                </ul>`,
+            2: `<h3>Giá trị theo thời gian của tiền tệ (Time Value of Money)</h3>
+                <p><strong>Khái niệm:</strong> Một đồng tiền ngày hôm nay có giá trị hơn một đồng tiền trong tương lai do chi phí cơ hội, lạm phát và rủi ro.</p>
+                <p><strong>Các phép tính cơ bản:</strong></p>
+                <ul>
+                    <li>Giá trị tương lai (FV) - Ghép lãi: Quá trình tính toán giá trị tương lai của một khoản tiền hiện tại. Lãi kép nghĩa là lãi nhập gốc.</li>
+                    <li>Giá trị hiện tại (PV) - Chiết khấu: Quá trình tính toán giá trị hiện tại của một khoản tiền trong tương lai.</li>
+                    <li><strong>Lãi suất hiệu dụng (EAR)</strong> là lãi suất thực tế nhận được khi ghép lãi nhiều lần trong năm.</li>
+                </ul>`,
+            3: `<h3>Lợi nhuận và Rủi ro</h3>
+                <p><strong>Tỷ suất sinh lời (Return):</strong> Bao gồm lợi suất cổ tức (hoặc lãi vay) và lợi suất do tăng vốn (chênh lệch giá).</p>
+                <p><strong>Rủi ro (Risk):</strong> Sự sai lệch của kết quả thực tế so với kết quả kỳ vọng. Đo lường bằng phương sai hoặc độ lệch chuẩn.</p>
+                <p><strong>Danh mục đầu tư (Portfolio):</strong> Đa dạng hóa giúp loại trừ rủi ro phi hệ thống (rủi ro công ty), nhưng không loại trừ được rủi ro hệ thống (rủi ro thị trường).</p>
+                <p><strong>Mô hình CAPM:</strong> E(Ri) = Rf + βi * [E(Rm) - Rf]. Giải thích mối quan hệ tuyến tính giữa rủi ro hệ thống (Beta) và tỷ suất sinh lợi kỳ vọng.</p>`,
+            4: `<h3>Chi phí sử dụng vốn (Cost of Capital)</h3>
+                <p><strong>Định nghĩa:</strong> Tỷ suất sinh lời tối thiểu mà doanh nghiệp phải đạt được từ các dự án đầu tư để duy trì giá trị doanh nghiệp.</p>
+                <p><strong>WACC (Chi phí vốn bình quân gia quyền):</strong> Dùng trọng số là Giá trị thị trường.</p>
+                <p>Chịu ảnh hưởng bởi các yếu tố không kiểm soát được (Lãi suất, thuế suất) và kiểm soát được (Cấu trúc vốn mục tiêu, chính sách cổ tức).</p>
+                <ul>
+                    <li>Chi phí nợ vay (rd): Được hưởng lợi ích tấm chắn thuế (Tax shield). Do đó chi phí nợ luôn ưu đãi hơn nếu có thuế.</li>
+                    <li>Chi phí lợi nhuận giữ lại: Tính là chi phí cơ hội.</li>
+                    <li>Tấm chắn thuế từ khấu hao và lãi vay rất quan trọng trong quyết định dòng tiền dự án.</li>
+                </ul>`,
+            5: `<h3>Lý thuyết cơ cấu vốn</h3>
+                <p><strong>Lý thuyết M&M (Modigliani-Miller):</strong></p>
+                <ul>
+                    <li><em>Không thuế:</em> Cấu trúc vốn không ảnh hưởng đến giá trị doanh nghiệp (Vl = Vu).</li>
+                    <li><em>Có thuế TNDN:</em> Giá trị DN có vay nợ lớn hơn nhờ hiện giá của tấm chắn thuế từ lãi vay.</li>
+                </ul>
+                <p><strong>Lý thuyết Trật tự phân hạng (Pecking Order):</strong> Doanh nghiệp ưu tiên sử dụng nguồn tài trợ theo thứ tự: (1) Lợi nhuận giữ lại, (2) Nợ vay, (3) Phát hành cổ phiếu mới.</p>
+                <p><strong>Đòn bẩy hoạt động (DOL) & Đòn bẩy tài chính (DFL):</strong> DOL đo lường rủi ro kinh doanh, DFL đo lường rủi ro tài chính.</p>`
+        };
+
+        const formulasData = {
+            2: `<h3>Công thức - Chương 2</h3>
+                <ul>
+                    <li><strong>Giá trị tương lai (FV):</strong> <code>FV = PV * (1 + r)^n</code></li>
+                    <li><strong>Giá trị hiện tại (PV):</strong> <code>PV = FV / (1 + r)^n</code></li>
+                    <li><strong>Lãi suất hiệu dụng (EAR):</strong> <code>EAR = (1 + r/m)^m - 1</code></li>
+                    <li><strong>Hiệu ứng Fisher:</strong> <code>1 + R_danh_nghia = (1 + R_thuc) * (1 + Lạm_phát)</code></li>
+                </ul>`,
+            3: `<h3>Công thức - Chương 3</h3>
+                <ul>
+                    <li><strong>Tỷ suất sinh lợi kỳ vọng:</strong> <code>E(R) = Σ (Pi * Ri)</code></li>
+                    <li><strong>Phương sai (σ²):</strong> <code>σ² = Σ [Pi * (Ri - E(R))²]</code></li>
+                    <li><strong>Hệ số biến thiên (CV):</strong> <code>CV = σ / E(R)</code></li>
+                    <li><strong>Định giá tài sản vốn (CAPM):</strong> <code>E(Ri) = Rf + β * (Rm - Rf)</code></li>
+                </ul>`,
+            4: `<h3>Công thức - Chương 4</h3>
+                <ul>
+                    <li><strong>Chi phí nợ sau thuế:</strong> <code>rd_after = rd * (1 - T)</code></li>
+                    <li><strong>Chi phí vốn cổ phần (Gordon):</strong> <code>re = (D1 / P0) + g</code></li>
+                    <li><strong>WACC:</strong> <code>WACC = Wd * rd * (1-T) + Wp * rp + We * re</code></li>
+                </ul>`,
+            5: `<h3>Công thức - Chương 5</h3>
+                <ul>
+                    <li><strong>Sản lượng hòa vốn:</strong> <code>Qbe = Định phí / (Giá bán - Biến phí)</code></li>
+                    <li><strong>Đòn bẩy hoạt động (DOL):</strong> <code>DOL = (ΔEBIT / EBIT) / (ΔQ / Q) = Q(P - V) / [Q(P - V) - F]</code></li>
+                    <li><strong>Đòn bẩy tài chính (DFL):</strong> <code>DFL = (ΔEPS / EPS) / (ΔEBIT / EBIT) = EBIT / (EBIT - I)</code></li>
+                    <li><strong>Giá trị DN (M&M có thuế):</strong> <code>Vl = Vu + T*D</code></li>
+                </ul>`
+        };
+
+        // --- COMPONENTS ---
+
+        const Header = () => (
+            <div className="bg-gradient-to-r from-purple-700 via-indigo-600 to-purple-800 rounded-3xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden mb-6">
+                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+                <div className="relative z-10">
+                    <div className="text-sm font-semibold uppercase tracking-wider mb-2 opacity-80">Bộ tài liệu ôn tập - Cập nhật 2026</div>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">Học chắc kiến thức.<br/>Nắm vững từng dạng bài.</h1>
+                    <p className="text-purple-100 mb-6 max-w-2xl text-sm md:text-base">Hệ thống đã cập nhật tổng hợp hàng loạt câu hỏi từ các đề cương TCDN mới nhất.</p>
+                </div>
+            </div>
+        );
+
+        const MatrixAlert = () => (
+            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-start gap-3 mb-6 shadow-sm">
+                <div className="bg-white rounded-full p-1 shadow-sm mt-0.5">
+                    <span className="text-emerald-500 text-lg">💡</span>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                    <span className="font-bold text-gray-900">Bản Cập Nhật Dữ Liệu:</span> Ngân hàng câu hỏi vừa được mở rộng cực lớn với các nguồn đề cương ôn tập bạn cung cấp. Tổng cộng có {questionsData.length} câu hỏi rải đều các chương. Bạn có thể làm thi thử để kiểm tra ngay!
+                </p>
+            </div>
+        );
+
+        // -- QUESTION CARD COMPONENT --
+        const QuestionCard = ({ question, hideAnswers, userAnswer, onAnswerSelect, isSubmittedTest }) => {
+            const [showExplanation, setShowExplanation] = useState(false);
+            const isAnswered = userAnswer !== undefined;
+
+            return (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-4 transition-all">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div className="flex gap-2 text-xs font-medium">
+                            <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md">
+                                CHƯƠNG {question.chapterId}
+                            </span>
+                            <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md">
+                                {question.tag}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <h3 className="text-lg font-semibold text-gray-800 mb-5 leading-relaxed">
+                        {question.text}
+                    </h3>
+
+                    <div className="space-y-3">
+                        {question.options.map((opt) => {
+                            const isCorrect = opt.id === question.correctAnswer;
+                            const isSelected = userAnswer === opt.id;
+                            
+                            let boxStyle = "border-gray-200 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer";
+                            let icon = null;
+
+                            if (!hideAnswers || isSubmittedTest) {
+                                if (isCorrect) {
+                                    boxStyle = "border-green-500 bg-green-50 text-green-800 font-medium ring-1 ring-green-500";
+                                    icon = <i className="fa-solid fa-check text-green-600"></i>;
+                                } else if (isSelected && !isCorrect) {
+                                    boxStyle = "border-red-400 bg-red-50 text-red-700 font-medium ring-1 ring-red-400 opacity-80";
+                                    icon = <i className="fa-solid fa-xmark text-red-500"></i>;
+                                } else {
+                                    boxStyle = "border-gray-200 bg-white text-gray-400 opacity-60 cursor-default";
+                                }
+                            } else {
+                                if (isAnswered) {
+                                    if (isSelected) {
+                                        boxStyle = "border-indigo-500 bg-indigo-50 text-indigo-800 font-medium ring-1 ring-indigo-500";
+                                    } else {
+                                        boxStyle = "cursor-default border-gray-200 opacity-60";
+                                    }
+                                } else {
+                                     boxStyle = "border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 cursor-pointer";
+                                }
+                            }
+
+                            return (
+                                <div 
+                                    key={opt.id}
+                                    onClick={() => {
+                                        if (hideAnswers && !isSubmittedTest) {
+                                            onAnswerSelect(question.id, opt.id);
+                                        }
+                                    }}
+                                    className={`flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 ${boxStyle}`}
+                                >
+                                    <div className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold ${
+                                        (isSelected || (!hideAnswers && isCorrect) || (isSubmittedTest && isCorrect)) 
+                                        ? 'bg-white shadow-sm' : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                        {opt.id}
+                                    </div>
+                                    <div className="flex-1 pt-0.5 leading-tight">{opt.text}</div>
+                                    {icon && <div className="flex-shrink-0 ml-2">{icon}</div>}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {question.explanation && (!hideAnswers || isSubmittedTest || (hideAnswers && isAnswered)) && (
+                        <div className="mt-5 pt-4 border-t border-gray-100">
+                            <button 
+                                onClick={() => setShowExplanation(!showExplanation)}
+                                className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-2 transition-colors"
+                            >
+                                <i className={`fa-solid fa-chevron-${showExplanation ? 'up' : 'down'}`}></i>
+                                {showExplanation ? "Ẩn giải thích" : "Xem giải thích chi tiết"}
+                            </button>
+                            
+                            {showExplanation && (
+                                <div className="mt-3 p-4 bg-indigo-50/50 rounded-xl text-sm text-gray-700 leading-relaxed border border-indigo-100">
+                                    <span className="font-bold text-indigo-800 mr-2">Giải thích:</span> 
+                                    {question.explanation}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // -- MOCK TEST COMPONENT --
+        const MockTestModule = () => {
+            const [testState, setTestState] = useState('setup'); 
+            const [timeLeft, setTimeLeft] = useState(20 * 60); 
+            const [testQuestions, setTestQuestions] = useState([]);
+            const [userAnswers, setUserAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            
+            const timerRef = useRef(null);
+
+            const startTest = () => {
+                // Shuffle all questions and pick 20 random ones
+                const shuffled = [...questionsData].sort(() => 0.5 - Math.random());
+                setTestQuestions(shuffled.slice(0, 20));
+                setTestState('playing');
+                setTimeLeft(20 * 60); // 20 min timer
+                setUserAnswers({});
+                
+                timerRef.current = setInterval(() => {
+                    setTimeLeft((prev) => {
+                        if (prev <= 1) {
+                            clearInterval(timerRef.current);
+                            submitTest(true);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            };
+
+            const submitTest = (auto = false) => {
+                if(timerRef.current) clearInterval(timerRef.current);
+                
+                let correctCount = 0;
+                testQuestions.forEach(q => {
+                    if (userAnswers[q.id] === q.correctAnswer) correctCount++;
+                });
+                
+                setScore(correctCount);
+                setTestState('result');
+                if(!auto) alert(`Bạn đã nộp bài thành công! Điểm: ${correctCount}/${testQuestions.length}`);
+            };
+
+            const formatTime = (seconds) => {
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                return `${m}:${s}`;
+            };
+
+            if (testState === 'setup') {
+                return (
+                    <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
+                        <div className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i className="fa-solid fa-stopwatch text-4xl text-indigo-600"></i>
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Kiểm Tra Năng Lực Trắc Nghiệm TCDN</h2>
+                        <p className="text-gray-600 mb-8 max-w-md mx-auto">Hệ thống sẽ chọn ngẫu nhiên 20 câu hỏi (trộn từ cả 5 chương trong ngân hàng đồ sộ). Thời gian làm bài là 20 phút. Phù hợp làm đề thi chuẩn bị cho thi cuối kỳ.</p>
+                        <button 
+                            onClick={startTest}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-0.5"
+                        >
+                            Bắt đầu làm bài
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="relative">
+                    <div className="glass-header sticky top-0 z-50 p-4 rounded-b-2xl shadow-sm mb-6 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg font-bold text-lg ${timeLeft < 60 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-indigo-100 text-indigo-700'}`}>
+                                <i className="fa-solid fa-clock mr-2"></i>
+                                {formatTime(timeLeft)}
+                            </div>
+                            <span className="text-sm font-medium text-gray-500 hidden sm:block">
+                                Đã làm: {Object.keys(userAnswers).length} / {testQuestions.length}
+                            </span>
+                        </div>
+                        {testState === 'playing' ? (
+                            <button onClick={() => submitTest(false)} className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-xl font-bold text-sm transition-colors">
+                                Nộp Bài
+                            </button>
+                        ) : (
+                            <button onClick={() => setTestState('setup')} className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-xl font-bold text-sm transition-colors">
+                                Thi lại
+                            </button>
+                        )}
+                    </div>
+
+                    {testState === 'result' && (
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 text-center mb-8 border border-green-100">
+                            <h3 className="text-xl font-bold text-green-800 mb-2">Kết quả làm bài</h3>
+                            <div className="text-5xl font-extrabold text-green-600 mb-4">
+                                {(score / testQuestions.length * 10).toFixed(1)} <span className="text-2xl text-green-500 font-medium">điểm</span>
+                            </div>
+                            <p className="text-green-700 font-medium">Bạn trả lời đúng {score} trên tổng số {testQuestions.length} câu hỏi.</p>
+                        </div>
+                    )}
+
+                    <div className="space-y-4">
+                        {testQuestions.map((q, idx) => (
+                            <div key={q.id} className="relative">
+                                <div className="absolute top-6 -left-3 sm:-left-6 w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md z-10">
+                                    {idx + 1}
+                                </div>
+                                <div className="ml-2 sm:ml-0">
+                                    <QuestionCard 
+                                        question={q} 
+                                        hideAnswers={testState === 'playing'}
+                                        isSubmittedTest={testState === 'result'}
+                                        userAnswer={userAnswers[q.id]}
+                                        onAnswerSelect={(qId, oId) => {
+                                            if(testState === 'playing') setUserAnswers(prev => ({...prev, [qId]: oId}))
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // -- THEORY COMPONENT --
+        const ContentTab = ({ type }) => {
+            const [selectedChapter, setSelectedChapter] = useState(1);
+            const dataSource = type === 'theory' ? theoryData : formulasData;
+
+            return (
+                <div className="flex flex-col lg:flex-row gap-8">
+                    <div className="w-full lg:w-1/4 flex-shrink-0">
+                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 sticky top-4">
+                            <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <i className="fa-solid fa-layer-group text-indigo-500"></i> Chọn chương
+                            </h2>
+                            <div className="space-y-1">
+                                {chaptersData.filter(c => c.id !== 0).map(chap => {
+                                    const isActive = selectedChapter === chap.id;
+                                    return (
+                                        <button
+                                            key={chap.id}
+                                            onClick={() => setSelectedChapter(chap.id)}
+                                            className={`w-full flex items-center justify-between p-3 rounded-xl text-left text-sm transition-all duration-200
+                                                ${isActive 
+                                                    ? 'bg-indigo-50 border-l-4 border-indigo-600 text-indigo-800 font-semibold' 
+                                                    : 'border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                }`}
+                                        >
+                                            <span className={`truncate pr-2 ${isActive ? 'font-bold' : ''}`}>
+                                                {chap.title}
+                                            </span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="w-full lg:w-3/4">
+                        <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm prose max-w-none text-gray-700">
+                            {dataSource[selectedChapter] ? (
+                                <div dangerouslySetInnerHTML={{ __html: dataSource[selectedChapter] }} />
+                            ) : (
+                                <p className="text-gray-400 italic text-center py-10">Đang cập nhật dữ liệu cho chương này...</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('questions'); 
+            const [selectedChapter, setSelectedChapter] = useState(0); 
+            const [searchQuery, setSearchQuery] = useState("");
+            const [hideAnswers, setHideAnswers] = useState(false);
+            const [userAnswers, setUserAnswers] = useState({});
+
+            const filteredQuestions = useMemo(() => {
+                return questionsData.filter(q => {
+                    const matchChapter = selectedChapter === 0 || q.chapterId === selectedChapter;
+                    const matchSearch = q.text.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                        q.options.some(opt => opt.text.toLowerCase().includes(searchQuery.toLowerCase()));
+                    return matchChapter && matchSearch;
+                });
+            }, [selectedChapter, searchQuery]);
+
+            const handleAnswerSelect = (questionId, optionId) => {
+                setUserAnswers(prev => ({ ...prev, [questionId]: optionId }));
+            };
+
+            useEffect(() => {
+                if (!hideAnswers) setUserAnswers({});
+            }, [hideAnswers]);
+
+            const getChapterCount = (chapId) => {
+                if (chapId === 0) return questionsData.length;
+                return questionsData.filter(q => q.chapterId === chapId).length;
+            };
+
+            return (
+                <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto">
+                    <Header />
+                    
+                    {activeTab !== 'mocktest' && <MatrixAlert />}
+
+                    <div className="flex flex-wrap items-center gap-2 mb-8 border-b border-gray-200 pb-px">
+                        <button onClick={() => setActiveTab('questions')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl font-semibold text-sm transition-colors ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
+                            <i className="fa-solid fa-file-lines"></i> {questionsData.length} câu hỏi ôn tập
+                        </button>
+                        <button onClick={() => setActiveTab('theory')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl font-semibold text-sm transition-colors ${activeTab === 'theory' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
+                            <i className="fa-solid fa-book-open"></i> Lý thuyết
+                        </button>
+                        <button onClick={() => setActiveTab('formulas')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl font-semibold text-sm transition-colors ${activeTab === 'formulas' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
+                            <i className="fa-solid fa-calculator"></i> Công thức
+                        </button>
+                        <button onClick={() => setActiveTab('mocktest')} className={`flex items-center gap-2 px-5 py-3 rounded-t-xl font-semibold text-sm transition-colors ml-auto ${activeTab === 'mocktest' ? 'bg-green-500 text-white shadow-md' : 'text-green-600 hover:bg-green-50'}`}>
+                            <i className="fa-solid fa-stopwatch"></i> Thi thử (Mới)
+                        </button>
+                    </div>
+
+                    {activeTab === 'questions' && (
+                        <div className="flex flex-col lg:flex-row gap-8">
+                            <div className="w-full lg:w-1/4 flex-shrink-0">
+                                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 sticky top-4">
+                                    <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                        <i className="fa-solid fa-layer-group text-indigo-500"></i> Chọn chương
+                                    </h2>
+                                    <div className="space-y-1">
+                                        {chaptersData.map(chap => {
+                                            const isActive = selectedChapter === chap.id;
+                                            return (
+                                                <button
+                                                    key={chap.id}
+                                                    onClick={() => setSelectedChapter(chap.id)}
+                                                    className={`w-full flex items-center justify-between p-3 rounded-xl text-left text-sm transition-all duration-200
+                                                        ${isActive ? 'bg-indigo-50 border-l-4 border-indigo-600 text-indigo-800 font-semibold' : 'border-l-4 border-transparent text-gray-600 hover:bg-gray-50'}`}
+                                                >
+                                                    <span className={`flex items-center gap-2 truncate pr-2 ${isActive ? 'font-bold' : ''}`}>
+                                                        {chap.id === 0 && <span className="text-xl">🌈</span>}
+                                                        {chap.title}
+                                                    </span>
+                                                    <span className={`text-xs font-medium px-2 py-1 rounded-md ${isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                        {getChapterCount(chap.id)}
+                                                    </span>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="w-full lg:w-3/4">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                                    <div className="relative w-full sm:w-1/2">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i className="fa-solid fa-magnifying-glass text-gray-400"></i>
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Gõ vài chữ đầu của câu hỏi..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 outline-none text-sm shadow-sm"
+                                        />
+                                    </div>
+
+                                    <div className="bg-white border border-gray-200 rounded-xl p-2 px-4 flex items-center gap-4 shadow-sm w-full sm:w-auto justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-indigo-100 text-indigo-600 p-2 rounded-lg">
+                                                <i className="fa-solid fa-bullseye"></i>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-gray-800">Ẩn đáp án để tự luyện</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                id="toggle" 
+                                                checked={hideAnswers}
+                                                onChange={() => setHideAnswers(!hideAnswers)}
+                                                className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                                            />
+                                            <label htmlFor="toggle" className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-bold text-gray-800">Ngân hàng trắc nghiệm ({filteredQuestions.length} câu)</h2>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {filteredQuestions.length > 0 ? (
+                                        filteredQuestions.map(q => (
+                                            <QuestionCard 
+                                                key={q.id} 
+                                                question={q} 
+                                                hideAnswers={hideAnswers}
+                                                userAnswer={userAnswers[q.id]}
+                                                onAnswerSelect={handleAnswerSelect}
+                                                isSubmittedTest={false}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
+                                            <i className="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
+                                            <p className="text-gray-500 font-medium">Không tìm thấy câu hỏi nào phù hợp.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'theory' && <ContentTab type="theory" />}
+                    {activeTab === 'formulas' && <ContentTab type="formulas" />}
+                    {activeTab === 'mocktest' && <MockTestModule />}
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
